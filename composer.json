@@ -1,0 +1,19 @@
+{
+  "name": "statonlab/automated_annotation",
+  "description": "Send notifications about features missing annotations",
+  "type": "module",
+  "require": {
+    "ext-json": "*"
+  },
+  "require-dev": {
+    "statonlab/tripal-test-suite": "1.*"
+  },
+  "license": "GPLv3",
+  "authors": [
+    {
+      "name": "Abdullah Almsaeed",
+      "email": "aalmsaee@utk.edu"
+    }
+  ],
+  "minimum-stability": "stable"
+}
