@@ -4,7 +4,8 @@ function automated_annotation_report_page() {
   $finder = new \AutomatedAnnotation\FeatureFinder();
 
 
-  $query = $finder->blastQuery('gene');
+  $cvterm = $finder->cvterm('gene');
+  $query = $finder->blastQuery($cvterm);
   $query->fields('F', ['organism_id', 'COUNT(*)']);
   $query->fields('CVT', ['name']);
   $query->groupBy('F.organism_id');
@@ -19,11 +20,14 @@ function automated_annotation_report_page() {
     return $item->organism_id;
   }, $all);
 
-  $organisms = db_select('chado.organism', 'CO')
-    ->fields('CO')
-    ->condition('organism_id', $organism_ids, 'IN')
-    ->execute()
-    ->fetchAll();
+  $organisms = [];
+  if (!empty($organism_ids)) {
+    $organisms = db_select('chado.organism', 'CO')
+      ->fields('CO')
+      ->condition('organism_id', $organism_ids, 'IN')
+      ->execute()
+      ->fetchAll();
+  }
 
   $indexed_organisms = [];
   foreach ($organisms as $organism) {
@@ -31,7 +35,7 @@ function automated_annotation_report_page() {
   }
 
   foreach ($all as &$item) {
-    $item->organism = $indexed_organisms[$item->organism_id];
+    $item->organism = $indexed_organisms[$item->organism_id] ?: null;
   }
 
   dpm($all);
