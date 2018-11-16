@@ -3,7 +3,8 @@
 function automated_annotation_report_page() {
   $finder = new \AutomatedAnnotation\FeatureFinder();
 
-  $query = $finder->blastQuery();
+
+  $query = $finder->blastQuery('gene');
   $query->fields('F', ['organism_id', 'COUNT(*)']);
   $query->fields('CVT', ['name']);
   $query->groupBy('F.organism_id');
