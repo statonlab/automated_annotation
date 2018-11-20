@@ -35,10 +35,10 @@ function automated_annotation_report_form($form, &$form_state) {
     $finder = new \AutomatedAnnotation\AnnotationFinder();
     $organism_id = $form_state['values']['organism'];
     $blast = $finder->blast($organism_id);
-    $terms = $finder->featureCVTerm($organism_id);
+//    $terms = $finder->featureCVTerm($organism_id);
 
     dpm($blast);
-    dpm($terms);
+//    dpm($terms);
 
     $cvterms = [];
     $form['ajax_response']['report'] = [
