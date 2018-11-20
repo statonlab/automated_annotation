@@ -2,7 +2,7 @@
 
 namespace Tests;
 
-use AutomatedAnnotation\FeatureFinder;
+use AutomatedAnnotation\AnnotationFinder;
 use StatonLab\TripalTestSuite\DBTransaction;
 use StatonLab\TripalTestSuite\TripalTestCase;
 
@@ -14,7 +14,7 @@ class FeatureFinderTest extends TripalTestCase {
    * @throws \Exception
    */
   public function testThatCVTermFinderWorks() {
-    $finder = new FeatureFinder();
+    $finder = new AnnotationFinder();
     $cvterm = $finder->cvterm('mRNA');
     $this->assertNotEmpty($cvterm);
     $this->assertEquals($cvterm->name, 'mRNA');
@@ -30,7 +30,7 @@ class FeatureFinderTest extends TripalTestCase {
       'type_id' => $cvterm->cvterm_id,
     ]);
 
-    $finder = new FeatureFinder();
+    $finder = new AnnotationFinder();
     $count = $finder->countBlast($cvterm->name);
     $this->assertEquals(count($features), $count);
   }
@@ -45,7 +45,7 @@ class FeatureFinderTest extends TripalTestCase {
       'type_id' => $cvterm->cvterm_id,
     ]);
 
-    $finder = new FeatureFinder();
+    $finder = new AnnotationFinder();
     $count = $finder->countCVTerm($cvterm->name);
     $this->assertEquals(count($features), $count);
   }
@@ -60,7 +60,7 @@ class FeatureFinderTest extends TripalTestCase {
       'type_id' => $cvterm->cvterm_id,
     ]);
 
-    $finder = new FeatureFinder();
+    $finder = new AnnotationFinder();
     $count = $finder->generateAnnotationsReport($cvterm->name);
     $this->assertEquals(count($features), $count['blast']);
     $this->assertEquals(count($features), $count['cvterm']);

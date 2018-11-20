@@ -2,7 +2,7 @@
 
 require_once 'includes/Services/Dumper.php';
 require_once 'includes/Services/FastaDumper.php';
-require_once 'includes/Services/FeatureFinder.php';
+require_once 'includes/Services/AnnotationFinder.php';
 require_once 'includes/api/automated_annotation.api.inc';
 
 
@@ -46,30 +46,5 @@ function automated_annotation_menu() {
  * @throws \MailCLIException
  */
 function automated_annotation_find_features_with_no_annotations() {
-  // We care about gene, mRNA and polypeptide
-  $finder = new \AutomatedAnnotation\FeatureFinder();
 
-  try {
-    $genes = $finder->generateAnnotationsReport('gene');
-    $mRNA = $finder->generateAnnotationsReport('mRNA');
-
-    $message = "There are {$genes['blast']} genes missing blast BLAST results.\n";
-    $message .= "There are {$genes['cvterm']} genes missing annotations.\n";
-    $message .= "There are {$mRNA['blast']} mRNAs missing blast BLAST results.\n";
-    $message .= "There are {$mRNA['cvterm']} mRNAs missing annotations.\n";
-  } catch (Exception $exception) {
-    $error = $exception->getMessage();
-    $message = "Unable to generate report due to the following error: {$error}\n";
-  }
-
-  echo "$message\n";
-
-  $settings = automated_annotation_get_settings();
-
-  //  (new MailCLIMessage())
-  //    ->to($settings['emails'])
-  //    ->from(user_load(1)->mail)
-  //    ->subject('Annotations Report')
-  //    ->message($message)
-  //    ->send();
 }
