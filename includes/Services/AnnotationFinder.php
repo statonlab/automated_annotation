@@ -79,7 +79,7 @@ class AnnotationFinder {
                                           AND DB.db_id IN (:dbs)
                                     GROUP BY DB.db_id', [
       ':oid' => $organism,
-      ':dbs' => $db_ids
+      ':dbs' => $db_ids,
     ])->fetchAll();
 
     foreach ($counts as $count) {
@@ -114,17 +114,31 @@ class AnnotationFinder {
   /**
    * Get the CVTerm record.
    *
-   * @param string $name
+   * @param string|array $name
    *
-   * @return object A CVTerm record.
+   * @return array|object A CVTerm record or an array of records.
    * @throws Exception
    */
   public function cvterm($name) {
-    $cvterm = db_select('chado.cvterm', 'C')
-      ->fields('C')
-      ->condition('C.name', $name)
-      ->execute()
-      ->fetchObject();
+    $cvterm = db_select('chado.cvterm', 'C');
+
+    $cvterm->fields('C');
+    if (is_array($name)) {
+      $cvterm->condition('C.name', $name, 'IN');
+
+    }
+    else {
+      $cvterm->condition('C.name', $name);
+    }
+
+    $cvterm = $cvterm->execute();
+
+    if (is_array($name)) {
+      $cvterm = $cvterm->fetchAll();
+    }
+    else {
+      $cvterm = $cvterm->fetchObject();
+    }
 
     if (empty($cvterm)) {
       throw new Exception('Unable to find term ' . $name);

@@ -10,9 +10,14 @@ abstract class Dumper {
   protected $output_file;
 
   /**
+   * @var string
+   */
+  protected $output_path;
+
+  /**
    * Dumper constructor.
    *
-   * @param null $output_path
+   * @param string $output_path
    *
    * @throws \Exception
    */
@@ -23,6 +28,7 @@ abstract class Dumper {
       if (!$this->output_file) {
         throw new \Exception('Unable to open file at ' . $output_path . '.');
       }
+      $this->output_path = $output_path;
     }
   }
 
@@ -32,12 +38,14 @@ abstract class Dumper {
    * @param $line
    */
   public function write($line) {
-    if ($this->output_file) {
+    if (!$this->output_file) {
       echo $line . "\n";
     }
     else {
       fputs($this->output_file, "{$line}\n");
     }
+
+    return $this;
   }
 
   /**
@@ -46,4 +54,13 @@ abstract class Dumper {
    * @return mixed
    */
   abstract public function dump();
+
+  /**
+   * Output file path.
+   *
+   * @return string
+   */
+  public function file() {
+    return $this->output_path;
+  }
 }

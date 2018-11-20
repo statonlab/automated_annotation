@@ -5,15 +5,21 @@ require_once 'includes/Services/FastaDumper.php';
 require_once 'includes/Services/AnnotationFinder.php';
 require_once 'includes/api/automated_annotation.api.inc';
 
-
 /**
  * Implements hook_menu().
  */
 function automated_annotation_menu() {
   $items = [];
 
-  $items['admin/config/automated-annotation'] = [
+  $items['admin/reports/automated-annotation'] = [
     'title' => 'Automated Annotation',
+    'description' => 'Configure the email addresses that receive annotation notifications.',
+    'page callback' => 'automated_annotation_list_menu_items',
+    'access arguments' => ['administer tripal'],
+  ];
+
+  $items['admin/reports/automated-annotation/settings'] = [
+    'title' => 'Settings',
     'description' => 'Configure the email addresses that receive annotation notifications.',
     'page callback' => 'drupal_get_form',
     'page arguments' => ['automated_annotation_settings_form'],
@@ -21,15 +27,9 @@ function automated_annotation_menu() {
     'file' => 'includes/automated_annotation_settings.form.inc',
   ];
 
-  $items['admin/config/automated-annotation/settings'] = [
-    'title' => 'Settings',
-    'description' => 'Configure the email addresses that receive annotation notifications.',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-  ];
-
-  $items['admin/config/automated-annotation/report'] = [
-    'title' => 'Annotations Report',
-    'description' => 'Configure the email addresses that receive annotation notifications.',
+  $items['admin/reports/automated-annotation/report'] = [
+    'title' => 'Report',
+    'description' => 'Generate organism reports.',
     'page callback' => 'drupal_get_form',
     'page arguments' => ['automated_annotation_report_form'],
     'access arguments' => ['administer tripal'],
@@ -41,10 +41,142 @@ function automated_annotation_menu() {
 }
 
 /**
- * Find features that need annotation.
+ * @return array
+ */
+function automated_annotation_list_menu_items() {
+  $items = automated_annotation_menu();
+  array_shift($items);
+  $page = [];
+  foreach ($items as $url => $item) {
+    $page[$url] = [
+      '#type' => 'item',
+      '#markup' => l($item['title'], $url) . " <div>" . t($item['description']) . "</div>",
+    ];
+  }
+
+  return $page;
+}
+
+/**
+ * @throws \Exception
+ */
+function automated_annotation_perform_checks() {
+  $organisms = automated_annotation_get_organisms();
+
+  $finder = new \AutomatedAnnotation\AnnotationFinder();
+
+  $types = ['mRNA', 'polypeptide', 'gene'];
+  $SO_terms = $finder->cvterm($types);
+
+  $report = [];
+  $organism_ids = [];
+  foreach ($organisms as $organism) {
+    $blast = $finder->blast($organism);
+    $terms = $finder->featureCVTerm($organism);
+
+    $report[$organism->organism_id] = [
+      'organism' => $organism,
+      'blast' => $blast,
+      'terms' => $terms,
+    ];
+
+    $has_blast = automated_annotation_has_annotation($blast);
+    $has_terms = automated_annotation_has_annotation($terms);
+
+    if (!$has_terms || !$has_blast) {
+      $organism_ids[] = $organism->organism_id;
+    }
+  }
+
+  $folder = 'public://automated_annotation';
+  file_prepare_directory($folder, FILE_CREATE_DIRECTORY);
+  $path = drupal_realpath($folder);
+
+  $files = [];
+  foreach ($SO_terms as $term) {
+    $file_path = "$path/{$term->name}.fasta";
+    $dumper = new \AutomatedAnnotation\FastaDumper($file_path);
+    $files[] = $dumper->organisms($organism_ids)
+      ->type($term)
+      ->dump();
+  }
+
+  automated_annotation_send_mail($report, $files);
+}
+
+/**
+ * @param $terms
+ *
+ * @return bool
+ */
+function automated_annotation_has_annotation($terms) {
+  foreach ($terms as $term) {
+    if ($term[1] <= 0) {
+      return FALSE;
+    }
+  }
+
+  return TRUE;
+}
+
+/**
+ * @param $report
  *
  * @throws \MailCLIException
  */
-function automated_annotation_find_features_with_no_annotations() {
+function automated_annotation_send_mail($report, $files) {
+  $header = "FASTA files can be found at:\n";
 
+  foreach ($files as $file) {
+    $header .= "$file\n";
+  }
+
+  $body = "\n";
+  foreach ($report as $item) {
+    $organism = $item['organism'];
+
+    if (automated_annotation_count_features($organism) <= 0) {
+      continue;
+    }
+
+    $body .= "{$organism->genus} {$organism->species} ({$organism->common_name}):\n";
+    foreach ($item['blast'] as $blast) {
+      if ($blast[1] <= 0) {
+        $body .= "BLAST {$blast[0]} is missing\n";
+      }
+    }
+
+    foreach ($item['terms'] as $term) {
+      if ($term[1] <= 0) {
+        $body .= "{$term[0]} annotations are missing\n";
+      }
+    }
+    $body .= "\n";
+  }
+
+  if (empty($body)) {
+    return;
+  }
+
+  $lines = "$header $body";
+
+  $settings = automated_annotation_get_settings();
+  (new MailCLIMessage())
+    ->subject('Automated Annotation Report ' . date('m/d/Y'))
+    ->to($settings['emails'])
+    ->from(variable_get('site_mail', ''))
+    ->message($lines)
+    ->send();
+}
+
+/**
+ * @param object $organism
+ *
+ * @return int
+ */
+function automated_annotation_count_features($organism) {
+  return (int) db_query('SELECT count(*) FROM chado.organism 
+                          WHERE organism_id=:oid', [
+    ':oid' => $organism->organism_id,
+  ])->fetchField();
 }

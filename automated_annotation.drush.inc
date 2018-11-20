@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * @return array
+ */
 function automated_annotation_drush_command() {
   $commands = [];
 
@@ -10,6 +13,9 @@ function automated_annotation_drush_command() {
   return $commands;
 }
 
+/**
+ * @throws \Exception
+ */
 function drush_automated_annotation_annotations_check() {
-
+  automated_annotation_perform_checks();
 }

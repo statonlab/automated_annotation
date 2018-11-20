@@ -25,6 +25,7 @@ class FastaDumper extends Dumper {
    */
   public function organism($organism) {
     $this->organism = $organism;
+    return $this;
   }
 
   /**
@@ -34,6 +35,7 @@ class FastaDumper extends Dumper {
    */
   public function organisms(array $organisms) {
     $this->organism = $organisms;
+    return $this;
   }
 
   /**
@@ -43,6 +45,7 @@ class FastaDumper extends Dumper {
    */
   public function type($cvterm) {
     $this->type = $cvterm;
+    return $this;
   }
 
   /**
@@ -52,7 +55,8 @@ class FastaDumper extends Dumper {
    */
   protected function fastaLine($feature) {
     $this->write(">{$feature->uniquename}");
-    $this->write($feature->residue);
+    $this->write(wordwrap($feature->residues, 75, "\n", true));
+    return $this;
   }
 
   /**
@@ -75,7 +79,7 @@ class FastaDumper extends Dumper {
   protected function query() {
     if (is_array($this->organism)) {
       $organisms = array_map(function ($organism) {
-        return $organism->organism_id;
+        return is_object($organism) ? $organism->organism_id : $organism;
       }, $this->organism);
     }
     else {
@@ -104,7 +108,7 @@ class FastaDumper extends Dumper {
   /**
    * Start printing fasta lines to the given file.
    *
-   * @return mixed|void
+   * @return mixed
    */
   public function dump() {
     $total = $this->count();
@@ -116,5 +120,7 @@ class FastaDumper extends Dumper {
         $this->fastaLine($feature);
       }
     }
+
+    return $this->file();
   }
 }
