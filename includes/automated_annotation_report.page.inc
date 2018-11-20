@@ -39,12 +39,12 @@ function automated_annotation_report_form($form, &$form_state) {
                                     WHERE F.organism_id = :oid', [':oid' => $organism_id])->fetchField();
 
     $cvterms = automated_annotation_make_cvterms_rows($organism_id);
-    $cvterms[] = ['Blast Hit Data', $blast_count];
+//    $cvterms[] = ['Blast Hit Data', $blast_count];
 
     $form['ajax_response']['report'] = [
       '#type' => 'markup',
       '#markup' => theme('table', [
-        'header' => ['Key', 'Value'],
+        'header' => ['Organism', 'Vocabulary', 'Count'],
         'rows' => $cvterms,
       ]),
     ];
@@ -66,13 +66,12 @@ function automated_annotation_report_form_callback($form, &$form_state) {
 }
 
 function automated_annotation_make_cvterms_rows($organism_id) {
-  $cvterm_counts = db_query('SELECT count(*), DB.db_id FROM chado.feature_cvterm FC 
+  $cvterm_counts = db_query('SELECT count(*), DB.db_id, F.organism_id FROM chado.feature_cvterm FC 
                                     INNER JOIN chado.feature F ON F.feature_id = FC.feature_id
                                     INNER JOIN chado.cvterm CVT ON FC.cvterm_id = CVT.cvterm_id
                                     INNER JOIN chado.dbxref DBX ON DBX.dbxref_id = CVT.dbxref_id
                                     INNER JOIN chado.db DB ON DB.db_id = DBX.db_id
-                                    WHERE F.organism_id = :oid 
-                                    GROUP BY DB.db_id', [
+                                    GROUP BY F.organism_id, DB.db_id', [
     ':oid' => $organism_id,
   ])->fetchAll();
 
@@ -92,7 +91,7 @@ function automated_annotation_make_cvterms_rows($organism_id) {
   }
 
   foreach ($cvterm_counts as $count) {
-    $cvterms[] = [$indexed_terms[$count->db_id]->name, $count->count];
+    $cvterms[] = [$count->organism_id, $indexed_terms[$count->db_id]->name, $count->count];
   }
 
   return $cvterms;
