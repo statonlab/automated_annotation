@@ -30,7 +30,8 @@ function automated_annotation_menu() {
   $items['admin/config/automated-annotation/report'] = [
     'title' => 'Annotations Report',
     'description' => 'Configure the email addresses that receive annotation notifications.',
-    'page callback' => 'automated_annotation_report_page',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => ['automated_annotation_report_form'],
     'access arguments' => ['administer tripal'],
     'file' => 'includes/automated_annotation_report.page.inc',
     'type' => MENU_LOCAL_TASK,

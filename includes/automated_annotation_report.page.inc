@@ -1,44 +1,99 @@
 <?php
 
-function automated_annotation_report_page() {
-  $finder = new \AutomatedAnnotation\FeatureFinder();
+function automated_annotation_report_form($form, &$form_state) {
+  $form['description'] = [
+    '#type' => 'item',
+    '#markup' => t('Select an organism to generate a report for.'),
+  ];
 
+  $organisms = automated_annotation_get_organisms();
 
-  $cvterm = $finder->cvterm('gene');
-  $query = $finder->blastQuery($cvterm);
-  $query->fields('F', ['organism_id', 'COUNT(*)']);
-  $query->fields('CVT', ['name']);
-  $query->groupBy('F.organism_id');
-  $query->groupBy('CVT.name');
-  $query->innerJoin('chado.cvterm', 'CVT', 'CVT.cvterm_id = F.type_id');
-  $query->innerJoin('chado.organism', 'O', 'O.organism_id = F.organism_id');
-  $query->having('COUNT(*) > 1');
-
-  $all = $query->execute()->fetchAll();
-
-  $organism_ids = array_map(function ($item) {
-    return $item->organism_id;
-  }, $all);
-
-  $organisms = [];
-  if (!empty($organism_ids)) {
-    $organisms = db_select('chado.organism', 'CO')
-      ->fields('CO')
-      ->condition('organism_id', $organism_ids, 'IN')
-      ->execute()
-      ->fetchAll();
-  }
-
-  $indexed_organisms = [];
+  $options = [
+    0 => '-- Select an Organism --',
+  ];
   foreach ($organisms as $organism) {
-    $indexed_organisms[$organism->organism_id] = $organism;
+    $options[$organism->organism_id] = $organism->genus . ' ' . $organism->species;
   }
 
-  foreach ($all as &$item) {
-    $item->organism = $indexed_organisms[$item->organism_id] ?: null;
+  $form['organism'] = [
+    '#title' => t('Organisms'),
+    '#type' => 'select',
+    '#options' => $options,
+    '#ajax' => [
+      'callback' => 'automated_annotation_report_form_callback',
+      'wrapper' => 'ajax_response',
+    ],
+  ];
+
+  $form['ajax_response'] = [
+    '#type' => 'markup',
+    '#prefix' => '<div id="ajax_response">',
+    '#suffix' => '</div>',
+  ];
+
+  if (isset($form_state['values']) && isset($form_state['values']['organism'])) {
+    $organism_id = $form_state['values']['organism'];
+
+    $blast_count = (int) db_query('SELECT count(*) FROM chado.blast_hit_data B 
+                                    INNER JOIN chado.feature F ON F.feature_id = B.feature_id
+                                    WHERE F.organism_id = :oid', [':oid' => $organism_id])->fetchField();
+
+    $cvterms = automated_annotation_make_cvterms_rows($organism_id);
+    $cvterms[] = ['Blast Hit Data', $blast_count];
+
+    $form['ajax_response']['report'] = [
+      '#type' => 'markup',
+      '#markup' => theme('table', [
+        'header' => ['Key', 'Value'],
+        'rows' => $cvterms,
+      ]),
+    ];
   }
 
-  dpm($all);
+  return $form;
+}
 
-  return '';
+function automated_annotation_report_form_validate($form, &$form_state) {
+
+}
+
+function automated_annotation_report_submit($form, &$form_state) {
+
+}
+
+function automated_annotation_report_form_callback($form, &$form_state) {
+  return $form['ajax_response'];
+}
+
+function automated_annotation_make_cvterms_rows($organism_id) {
+  $cvterm_counts = db_query('SELECT count(*), DB.db_id FROM chado.feature_cvterm FC 
+                                    INNER JOIN chado.feature F ON F.feature_id = FC.feature_id
+                                    INNER JOIN chado.cvterm CVT ON FC.cvterm_id = CVT.cvterm_id
+                                    INNER JOIN chado.dbxref DBX ON DBX.dbxref_id = CVT.dbxref_id
+                                    INNER JOIN chado.db DB ON DB.db_id = DBX.db_id
+                                    WHERE F.organism_id = :oid 
+                                    GROUP BY DB.db_id', [
+    ':oid' => $organism_id,
+  ])->fetchAll();
+
+  $cvterms = [];
+  if (empty($cvterm_counts)) {
+    return $cvterms;
+  }
+
+  $ids = array_map(function ($cvterm) {
+    return $cvterm->db_id;
+  }, $cvterm_counts);
+
+  $all = db_query('SELECT * FROM chado.db WHERE db_id IN (:ids)', [':ids' => $ids])->fetchAll();
+  $indexed_terms = [];
+  foreach ($all as $term) {
+    $indexed_terms[$term->db_id] = $term;
+  }
+
+  foreach ($cvterm_counts as $count) {
+    $cvterms[] = [$indexed_terms[$count->db_id]->name, $count->count];
+  }
+
+  return $cvterms;
 }
