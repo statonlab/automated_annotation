@@ -81,18 +81,29 @@ function automated_annotation_make_cvterms_rows($organism_id) {
     return $cvterms;
   }
 
-  $ids = array_map(function ($cvterm) {
-    return $cvterm->db_id;
-  }, $cvterm_counts);
+  $db_ids = [];
+  $organism_ids = [];
 
-  $all = db_query('SELECT * FROM chado.db WHERE db_id IN (:ids)', [':ids' => $ids])->fetchAll();
+  foreach ($cvterm_counts as $count) {
+    $db_ids[$count->db_id] = $count->db_id;
+    $organism_ids[$count->organism_id] = $count->organism_id;
+  }
+
+  $dbs = db_query('SELECT * FROM chado.db WHERE db_id IN (:ids)', [':ids' => $db_ids])->fetchAll();
   $indexed_terms = [];
-  foreach ($all as $term) {
+  foreach ($dbs as $term) {
     $indexed_terms[$term->db_id] = $term;
   }
 
+  $organisms = db_query('SELECT * FROM chado.organism WHERE organism_id IN (:ids)', [':ids' => $organism_ids])->fetchAll();
+  $indexed_organisms = [];
+  foreach ($organisms as $organism) {
+    $indexed_organisms[$organism->organism_id] = $organism;
+  }
   foreach ($cvterm_counts as $count) {
-    $cvterms[] = [$count->organism_id, $indexed_terms[$count->db_id]->name, $count->count];
+    $organism = $indexed_organisms[$count->organism_id];
+    $organism_name = "$organism->genus $organism->species ($organism->common_name)";
+    $cvterms[] = [$organism_name, $indexed_terms[$count->db_id]->name, $count->count];
   }
 
   return $cvterms;
