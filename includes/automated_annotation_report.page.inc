@@ -71,6 +71,7 @@ function automated_annotation_make_cvterms_rows($organism_id) {
                                     INNER JOIN chado.cvterm CVT ON FC.cvterm_id = CVT.cvterm_id
                                     INNER JOIN chado.dbxref DBX ON DBX.dbxref_id = CVT.dbxref_id
                                     INNER JOIN chado.db DB ON DB.db_id = DBX.db_id
+                                    ORDER BY F.organism_id ASC
                                     GROUP BY F.organism_id, DB.db_id', [
     ':oid' => $organism_id,
   ])->fetchAll();
