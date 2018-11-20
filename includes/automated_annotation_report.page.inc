@@ -36,6 +36,7 @@ function automated_annotation_report_form($form, &$form_state) {
     $organism_id = $form_state['values']['organism'];
     $blast = $finder->blast($organism_id);
     $terms = $finder->featureCVTerm($organism_id);
+    $cvterms = [];
 
     foreach ($blast as $item) {
       $cvterms[] = [
@@ -51,7 +52,6 @@ function automated_annotation_report_form($form, &$form_state) {
       ];
     }
 
-    $cvterms = [];
     $form['ajax_response']['report'] = [
       '#type' => 'markup',
       '#markup' => theme('table', [
