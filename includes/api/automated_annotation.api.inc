@@ -30,5 +30,5 @@ function automated_annotation_set_settings($settings) {
  * @throws \Exception
  */
 function automated_annotation_get_organisms() {
-  return chado_query('SELECT * FROM {organism}')->fetchAll();
+  return chado_query('SELECT * FROM {organism} ORDER BY genus ASC, specis ASC')->fetchAll();
 }
