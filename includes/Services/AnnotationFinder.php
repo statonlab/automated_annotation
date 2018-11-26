@@ -54,6 +54,11 @@ class AnnotationFinder {
     return $results;
   }
 
+  /**
+   * @param $organism
+   *
+   * @return array
+   */
   public function featureCVTerm($organism) {
     $organism = is_object($organism) ? $organism->organism_id : $organism;
     $dbs = $this->db(['INTERPRO', 'GO', 'KEGG']);
@@ -76,7 +81,7 @@ class AnnotationFinder {
                                     INNER JOIN chado.dbxref DBX ON DBX.dbxref_id = CVT.dbxref_id
                                     INNER JOIN chado.db DB ON DB.db_id = DBX.db_id
                                     WHERE organism_id=:oid
-                                          AND DB.db_id IN (:dbs)
+                                      AND DB.db_id IN (:dbs)
                                     GROUP BY DB.db_id', [
       ':oid' => $organism,
       ':dbs' => $db_ids,
@@ -125,7 +130,6 @@ class AnnotationFinder {
     $cvterm->fields('C');
     if (is_array($name)) {
       $cvterm->condition('C.name', $name, 'IN');
-
     }
     else {
       $cvterm->condition('C.name', $name);
