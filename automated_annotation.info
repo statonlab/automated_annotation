@@ -2,4 +2,8 @@ name = Automated Annotation
 description = Notify admins of the site about features that are missing annotations
 core = 7.x
 configure = admin/config/automated_annotation
+
 dependencies[] = mail_cli
+dependencies[] = tripal
+dependencies[] = tripal_analysis_blast
+
