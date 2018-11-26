@@ -20,6 +20,23 @@ Visit `admin/reports/automated-annotation/report` to view reports.
 
 ![Report Example](docs/aa_report.png)
 
+## Sending Emails
+
+This module provides a drush command to send a report to a list of email addresses.
+
+```bash
+drush annotations-check
+```
+
+You can add this line to your crontab to run this command once a month:
+
+```bash
+# Where /var/www/html is the path to Drupal installation
+0 2 1 * * drush annotations-check --root=/var/www/html
+```
+
+The above line will run the report command once a month on the first day of the month at 2 am.
+
 ## License
 
 This software is licensed under GPLv3.
