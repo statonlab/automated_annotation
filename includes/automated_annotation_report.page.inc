@@ -41,8 +41,12 @@ function automated_annotation_report_form($form, &$form_state) {
   if (isset($form_state['values']) && isset($form_state['values']['organism'])) {
     $finder = new \AutomatedAnnotation\AnnotationFinder();
     $organism_id = $form_state['values']['organism'];
+    $blast_time_start = time();
     $blast = $finder->blast($organism_id);
+    $blast_time_end = time();
+    $terms_time_start = time();
     $terms = $finder->featureCVTerm($organism_id);
+    $terms_time_end = time();
     $cvterms = [];
 
     foreach ($blast as $item) {
@@ -58,6 +62,15 @@ function automated_annotation_report_form($form, &$form_state) {
         $item[1],
       ];
     }
+
+
+    $blast_time = $blast_time_end - $blast_time_start;
+    $term_time = $terms_time_end - $terms_time_start;
+    $total_time = $term_time + $blast_time;
+    $form['ajax_response']['time'] = [
+      '#type' => 'item',
+      '#markup' => t("Took $total_time seconds to generate this report. Spent $blast_time seconds to obtain BLAST information and $term_time seconds to generate the rest.")
+    ];
 
     $form['ajax_response']['report'] = [
       '#type' => 'markup',
