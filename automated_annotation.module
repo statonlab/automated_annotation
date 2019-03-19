@@ -61,7 +61,9 @@ function automated_annotation_list_menu_items() {
  * @throws \Exception
  */
 function automated_annotation_perform_checks() {
-  $organisms = automated_annotation_get_organisms();
+  $settings = automated_annotation_get_settings();
+
+  $organisms = automated_annotation_get_organisms($settings['max_organisms']);
 
   $finder = new \AutomatedAnnotation\AnnotationFinder();
 

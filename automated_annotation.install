@@ -1,0 +1,5 @@
+<?php
+
+function automated_annotation_install() {
+
+}
