@@ -141,7 +141,7 @@ function automated_annotation_send_mail($report, $files) {
       continue;
     }
 
-    if(automated_annotation_has_annotation($item['blast']) && automated_annotation_has_annotation($item['terms'])) {
+    if (automated_annotation_has_annotation($item['blast']) && automated_annotation_has_annotation($item['terms'])) {
       continue;
     }
 
