@@ -7,27 +7,29 @@ use Exception;
 class AnnotationFinder {
 
   /**
-   * @param $organism
+   * @param int|object $organism
    *
    * @return array
    * @throws \Exception
    */
   public function blast($organism) {
+    $dbs = $this->getBlastDbList();
+
     $results = [];
 
-    $counts = db_query('SELECT DB.db_id, DB.name, count(*) AS count 
-                        FROM chado.blast_hit_data B 
+    foreach ($dbs as $db) {
+      $count = db_query('SELECT count(*) AS count 
+                        FROM chado.blast_hit_data B
                         INNER JOIN chado.feature F ON F.feature_id = B.feature_id
-                        INNER JOIN chado.db DB ON DB.db_id = B.db_id 
-                        WHERE F.organism_id = :oid 
-                        GROUP BY DB.db_id
+                        WHERE F.organism_id = :oid
+                          AND db_id = :db_id 
                         ', [
-      ':oid' => is_object($organism) ? $organism->organism_id : $organism,
-    ])->fetchAll();
+        ':oid' => is_object($organism) ? $organism->organism_id : $organism,
+        ':db_id' => $db->db_id,
+      ])->fetchObject();
 
-    foreach ($counts as $count) {
-      $results[$count->db_id] = [
-        $count->name,
+      $results[$db->db_id] = [
+        $db->name,
         $count->count,
       ];
     }
@@ -136,5 +138,27 @@ class AnnotationFinder {
     }
 
     return $cvterm;
+  }
+
+  public function getBlastDbList() {
+    $cache = cache_get('automated_annotation:blast_dbs');
+    if ($cache) {
+      return $cache->data;
+    }
+
+    $databases = db_query('SELECT DISTINCT db_id FROM chado.blast_hit_data')->fetchAll();
+
+    $ids = array_map(function ($db) {
+      return $db->db_id;
+    }, $databases);
+
+    // attach names
+    $results = db_query('SELECT db_id, name FROM chado.db WHERE db_id IN (:dbs)', [
+      ':dbs' => $ids,
+    ])->fetchAll();
+
+    cache_set('automated_annotation:blast_dbs', $results);
+
+    return $results;
   }
 }
