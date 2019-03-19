@@ -4,6 +4,6 @@ core = 7.x
 configure = admin/config/automated_annotation
 
 dependencies[] = mail_cli
-dependencies[] = tripal
+dependencies[] = tripal (>=7.x-3.0)
 dependencies[] = tripal_analysis_blast
 

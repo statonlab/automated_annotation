@@ -2,6 +2,7 @@
 
 namespace Tests;
 
+require_once __DIR__.'/../includes/Services/AnnotationFinder.php';
 use AutomatedAnnotation\AnnotationFinder;
 use StatonLab\TripalTestSuite\DBTransaction;
 use StatonLab\TripalTestSuite\TripalTestCase;
