@@ -55,28 +55,30 @@ class AnnotationFinder {
       $db_ids[] = $db->db_id;
     }
 
-    if(empty($db_ids)) {
+    if (empty($db_ids)) {
       return [];
     }
 
-    $counts = db_query('SELECT count(*), DB.db_id FROM chado.feature_cvterm FC
+    foreach ($dbs as $db) {
+      $count = db_query('SELECT count(*), DB.db_id FROM chado.feature_cvterm FC
                                     INNER JOIN chado.feature F ON F.feature_id = FC.feature_id
                                     INNER JOIN chado.cvterm CVT ON FC.cvterm_id = CVT.cvterm_id
-                                    INNER JOIN chado.dbxref DBX ON DBX.dbxref_id = CVT.dbxref_id
-                                    INNER JOIN chado.db DB ON DB.db_id = DBX.db_id
                                     WHERE organism_id=:oid
-                                      AND DB.db_id IN (:dbs)
-                                    GROUP BY DB.db_id', [
-      ':oid' => $organism,
-      ':dbs' => $db_ids,
-    ])->fetchAll();
+                                      AND CVT.cvterm IN (
+                                      SELECT CVT2.cvterm_id FROM chado.cvterm CVT2
+                                         INNER JOIN chado.dbxref DBX ON DBX.dbxref_id = CVT.dbxref_id
+                                         WHERE  DBX.db_id = :db_id
+                                      )', [
+        ':oid' => $organism,
+        ':db_id' => $db,
+      ])->fetchObject();
 
-    foreach ($counts as $count) {
       $results[$count->db_id] = [
         $indexed_dbs[$count->db_id]->name,
         $count->count,
       ];
     }
+
 
     return $results;
   }
