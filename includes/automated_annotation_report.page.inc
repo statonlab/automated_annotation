@@ -45,19 +45,19 @@ function automated_annotation_report_form($form, &$form_state) {
     $finder = new \AutomatedAnnotation\AnnotationFinder();
     $organism_id = $form_state['values']['organism'];
     $blast_time_start = time();
-    $blast = $finder->blast($organism_id);
+//    $blast = $finder->blast($organism_id);
     $blast_time_end = time();
     $terms_time_start = time();
     $terms = $finder->featureCVTerm($organism_id);
     $terms_time_end = time();
     $cvterms = [];
 
-    foreach ($blast as $item) {
-      $cvterms[] = [
-        "BLAST: {$item[0]}",
-        $item[1],
-      ];
-    }
+//    foreach ($blast as $item) {
+//      $cvterms[] = [
+//        "BLAST: {$item[0]}",
+//        $item[1],
+//      ];
+//    }
 
     foreach ($terms as $item) {
       $cvterms[] = [
