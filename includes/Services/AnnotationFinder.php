@@ -15,7 +15,8 @@ class AnnotationFinder {
   public function blast($organism) {
     $results = [];
 
-    $counts = db_query('SELECT DB.db_id, DB.name, count(*) AS count FROM chado.blast_hit_data B 
+    $counts = db_query('SELECT DB.db_id, DB.name, count(*) AS count 
+                        FROM chado.blast_hit_data B 
                         INNER JOIN chado.feature F ON F.feature_id = B.feature_id
                         INNER JOIN chado.db DB ON DB.db_id = B.db_id 
                         WHERE F.organism_id = :oid 
@@ -60,21 +61,21 @@ class AnnotationFinder {
     }
 
     foreach ($dbs as $db) {
-      $count = db_query('SELECT count(*), DB.db_id FROM chado.feature_cvterm FC
+      $count = db_query('SELECT count(*) FROM chado.feature_cvterm FC
                                     INNER JOIN chado.feature F ON F.feature_id = FC.feature_id
                                     INNER JOIN chado.cvterm CVT ON FC.cvterm_id = CVT.cvterm_id
                                     WHERE organism_id=:oid
-                                      AND CVT.cvterm IN (
+                                      AND CVT.cvterm_id IN (
                                       SELECT CVT2.cvterm_id FROM chado.cvterm CVT2
                                          INNER JOIN chado.dbxref DBX ON DBX.dbxref_id = CVT.dbxref_id
                                          WHERE  DBX.db_id = :db_id
                                       )', [
         ':oid' => $organism,
-        ':db_id' => $db,
+        ':db_id' => $db->db_id,
       ])->fetchObject();
 
-      $results[$count->db_id] = [
-        $indexed_dbs[$count->db_id]->name,
+      $results[$db->db_id] = [
+        $db->name,
         $count->count,
       ];
     }
