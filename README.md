@@ -1,3 +1,5 @@
+!["Build"](https://travis-ci.org/statonlab/automated_annotation.svg?branch=master)
+
 This module allows you to generate annotation reports for organisms. By generating
 a table of available annotations per organism, you'll be able to see which
 vocabularies/databases are missing. It'll also email a report each month.
