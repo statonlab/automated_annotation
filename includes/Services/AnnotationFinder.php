@@ -66,9 +66,9 @@ class AnnotationFinder {
                                     INNER JOIN chado.cvterm CVT ON FC.cvterm_id = CVT.cvterm_id
                                     WHERE organism_id=:oid
                                       AND CVT.cvterm_id IN (
-                                      SELECT CVT2.cvterm_id FROM chado.cvterm CVT2
+                                      SELECT CVT.cvterm_id FROM chado.cvterm CVT
                                          INNER JOIN chado.dbxref DBX ON DBX.dbxref_id = CVT.dbxref_id
-                                         WHERE  DBX.db_id = :db_id
+                                         WHERE DBX.db_id = :db_id
                                       )', [
         ':oid' => $organism,
         ':db_id' => $db->db_id,

@@ -48,7 +48,7 @@ function automated_annotation_report_form($form, &$form_state) {
 //    $blast = $finder->blast($organism_id);
     $blast_time_end = time();
     $terms_time_start = time();
-//    $terms = $finder->featureCVTerm($organism_id);
+    $terms = $finder->featureCVTerm($organism_id);
     $terms_time_end = time();
     $cvterms = [];
 
@@ -59,12 +59,12 @@ function automated_annotation_report_form($form, &$form_state) {
 //      ];
 //    }
 
-//    foreach ($terms as $item) {
-//      $cvterms[] = [
-//        $item[0],
-//        $item[1],
-//      ];
-//    }
+    foreach ($terms as $item) {
+      $cvterms[] = [
+        $item[0],
+        $item[1],
+      ];
+    }
 
     $blast_time = $blast_time_end - $blast_time_start;
     $term_time = $terms_time_end - $terms_time_start;
