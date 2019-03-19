@@ -1,4 +1,4 @@
-!["Build"](https://travis-ci.org/statonlab/automated_annotation.svg?branch=master)
+[![Build Status](https://travis-ci.org/statonlab/automated_annotation.svg?branch=master)](https://travis-ci.org/statonlab/automated_annotation)
 
 This module allows you to generate annotation reports for organisms. By generating
 a table of available annotations per organism, you'll be able to see which
