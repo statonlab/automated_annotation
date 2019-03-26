@@ -33,7 +33,7 @@ function drush_automated_annotation_annotations_check() {
 }
 
 function drush_automated_annotation_get_dbs() {
-  $dbs = db_query('SELECT d.db_id, name FROM chado.db d
+  $dbs = db_query('SELECT distinct d.db_id, name FROM chado.db d
                     INNER JOIN chado.blast_hit_data b ON b.db_id = d.db_id 
                     WHERE name NOT IN (:names)', [
     ':names' => ['UNIPROT/TREMBL', 'Swiss-Prot'],
