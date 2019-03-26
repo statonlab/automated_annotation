@@ -50,8 +50,9 @@ function drush_automated_annotation_get_dbs() {
             from chado.blast_hit_data b 
             inner join chado.feature f on f.feature_id = b.feature_id
             inner join chado.organism o on f.organism_id = o.organism_id
-            where b.db_id in (:dbs)
-            ', [':dbs', $db_ids])->fetchAll();
+            where b.db_id in (:dbs)', [
+    ':dbs' => $db_ids,
+  ])->fetchAll();
 
   var_dump($orgs);
 }
