@@ -33,11 +33,15 @@ function drush_automated_annotation_annotations_check() {
 }
 
 function drush_automated_annotation_get_dbs() {
-  $dbs = db_query('SELECT distinct b.db_id, d.name FROM chado.blast_hit_data b inner join chado.db d on b.db_id = d.db_id')->fetchAll();
+  $dbs = db_query('SELECT d.db_id, name FROM chado.db d
+                    INNER JOIN chado.blast_hit_data b ON b.db_id = d.db_id 
+                    WHERE name NOT IN (:names)', [
+    ':names' => ['UNIPROT/TREMBL', 'Swiss-Prot'],
+  ])->fetchAll();
   var_dump($dbs);
 
-  $db_ids = array_filter($dbs, function($db) {
-    return !in_array($db->name, ['UNIPROT/TREMBL', 'Swiss-Prot']);
+  $db_ids = array_map($dbs, function ($db) {
+    return $db->id;
   });
 
 
