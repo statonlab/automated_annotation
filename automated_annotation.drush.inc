@@ -55,6 +55,14 @@ function drush_automated_annotation_get_dbs() {
   ])->fetchAll();
 
   var_dump($orgs);
+
+  foreach ($orgs as $org) {
+    $all = db_query('select distinct b.db_id, d.name from chado.blast_hit_data b inner join chado.feature f on f.feature_id = b.feature_id inner join chado.db d on d.db_id = b.db_id where f.organism_id = :org_id', [
+      ':org_id' => $org->organism_id
+    ])->fetchAll();
+
+    var_dump($all);
+  }
 }
 
 function drush_automated_annotation_clear_blast_db() {
