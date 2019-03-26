@@ -44,6 +44,7 @@ function drush_automated_annotation_get_dbs() {
     return $db->id;
   });
 
+  var_dump($db_ids);
 
   $orgs = db_query('SELECT distinct o.organism_id, o.common_name, genus, species 
             from chado.blast_hit_data b 
