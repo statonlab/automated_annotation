@@ -39,13 +39,10 @@ function drush_automated_annotation_get_dbs() {
                     WHERE name NOT IN (:names)', [
     ':names' => ['UNIPROT/TREMBL', 'Swiss-Prot'],
   ])->fetchAll();
-  var_dump($dbs);
 
   $db_ids = array_map(function ($db) {
     return $db->db_id;
   }, $dbs);
-
-  var_dump($db_ids);
 
   $orgs = db_query('select distinct o.organism_id, o.common_name, genus, species 
             from chado.blast_hit_data b 
@@ -55,14 +52,16 @@ function drush_automated_annotation_get_dbs() {
     ':dbs' => $db_ids,
   ])->fetchAll();
 
-  var_dump($orgs);
-
   foreach ($orgs as $org) {
     $all = db_query('select distinct b.db_id, d.name from chado.blast_hit_data b inner join chado.feature f on f.feature_id = b.feature_id inner join chado.db d on d.db_id = b.db_id where f.organism_id = :org_id', [
       ':org_id' => $org->organism_id,
     ])->fetchAll();
 
-    var_dump($all);
+    drush_log("$org->organism_id: $org->common_name ($org->genus $org->species) has the following databases:");
+    foreach ($all as $item) {
+      echo "ID: $item->db_id, NAME: $org->db_name\n";
+    }
+    echo "\n";
   }
 }
 
