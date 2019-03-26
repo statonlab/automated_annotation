@@ -6,7 +6,8 @@
     "ext-json": "*"
   },
   "require-dev": {
-    "statonlab/tripal-test-suite": "1.*"
+    "statonlab/tripal-test-suite": "1.*",
+    "drush/drush": "^8"
   },
   "license": "GPLv3",
   "authors": [

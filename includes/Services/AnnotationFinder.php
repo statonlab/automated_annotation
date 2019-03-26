@@ -82,7 +82,6 @@ class AnnotationFinder {
       ];
     }
 
-
     return $results;
   }
 
