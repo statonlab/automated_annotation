@@ -59,7 +59,7 @@ function drush_automated_annotation_get_dbs() {
 
     drush_log("$org->organism_id: $org->common_name ($org->genus $org->species) has the following databases:");
     foreach ($all as $item) {
-      echo "ID: $item->db_id, NAME: $org->db_name\n";
+      echo "ID: $item->db_id, NAME: $org->name\n";
     }
     echo "\n";
   }
