@@ -12,15 +12,15 @@ function automated_annotation_drush_command() {
 
   $commands['clear-blast-db'] = [
     'description' => 'temporary function',
+    'options' => [
+      'organism_id' => 'o1',
+      'old_db_id' => 'o2',
+      'new_db_id' => 'o3'
+    ]
   ];
 
   $commands['get-dbs'] = [
     'description' => 'tmp fn',
-    'options' => [
-      'organism_id' => '',
-      'old_db_id' => '',
-      'new_db_id' => ''
-    ]
   ];
 
   return $commands;
