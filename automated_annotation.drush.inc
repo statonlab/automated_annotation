@@ -57,9 +57,9 @@ function drush_automated_annotation_get_dbs() {
       ':org_id' => $org->organism_id,
     ])->fetchAll();
 
-    echo "$org->organism_id: $org->common_name ($org->genus $org->species) has the following databases:";
+    echo "$org->organism_id: $org->common_name ($org->genus $org->species) has the following databases:\n";
     foreach ($all as $item) {
-      echo "ID: $item->db_id, NAME: $org->name\n";
+      echo "ID: $item->db_id, NAME: $item->name\n";
     }
     echo "\n";
   }
@@ -102,5 +102,4 @@ function drush_automated_annotation_clear_blast_db() {
     $t->rollback();
     drush_log('ERROR: ' . $exception->getMessage(), 'error');
   }
-
 }
