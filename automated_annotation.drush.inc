@@ -58,7 +58,7 @@ function drush_automated_annotation_get_dbs() {
 
   foreach ($orgs as $org) {
     $all = db_query('select distinct b.db_id, d.name from chado.blast_hit_data b inner join chado.feature f on f.feature_id = b.feature_id inner join chado.db d on d.db_id = b.db_id where f.organism_id = :org_id', [
-      ':org_id' => $org->organism_id
+      ':org_id' => $org->organism_id,
     ])->fetchAll();
 
     var_dump($all);
@@ -82,15 +82,21 @@ function drush_automated_annotation_clear_blast_db() {
     throw new \Exception("Please provide an new db id using the --db_id=[ID] option");
   }
 
-  db_query('UPDATE chado.blast_hit_data 
+  $t = db_transaction();
+  try {
+    db_query('UPDATE chado.blast_hit_data 
             SET db_id = :new_db_id 
             WHERE db_id = :old_db_id
               AND feature_id IN (
                 SELECT feature_id FROM chado.feature WHERE organism_id=:oid
               )
             ', [
-    ':oid' => $organism_id,
-    ':old_db_id' => $old_db_id,
-    ':new_db_id' => $new_db_id,
-  ])->execute();
+      ':oid' => $organism_id,
+      ':old_db_id' => $old_db_id,
+      ':new_db_id' => $new_db_id,
+    ])->execute();
+  } catch (\Exception $exception) {
+    $t->rollback();
+    drush_log('ERROR: ' . $exception->getMessage(), 'error');
+  }
 }
