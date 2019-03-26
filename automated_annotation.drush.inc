@@ -11,15 +11,15 @@ function automated_annotation_drush_command() {
   ];
 
   $commands['clear-blast-db'] = [
-    'description' => 'temporary function'
+    'description' => 'temporary function',
   ];
 
-  $commands['get-dbs'] =[
-    'description' => 'tmp fn'
+  $commands['get-dbs'] = [
+    'description' => 'tmp fn',
   ];
 
-  $commands['get-organisms'] =[
-    'description' => 'tmp fn'
+  $commands['get-organisms'] = [
+    'description' => 'tmp fn',
   ];
 
   return $commands;
@@ -48,17 +48,29 @@ function drush_automated_annotation_get_dbs() {
 function drush_automated_annotation_clear_blast_db() {
   // Get options
   $organism_id = drush_get_option('organism_id');
-  if(is_null($organism_id)) {
+  if (is_null($organism_id)) {
     throw new \Exception("Please provide an organism id using the --organism_id=[ID] option");
   }
 
   $old_db_id = drush_get_option('old_db_id');
-  if(is_null($old_db_id)) {
+  if (is_null($old_db_id)) {
     throw new \Exception("Please provide an old db id using the --old_db_id=[ID] option");
   }
 
   $new_db_id = drush_get_option('new_db_id');
-  if(is_null($new_db_id)) {
+  if (is_null($new_db_id)) {
     throw new \Exception("Please provide an new db id using the --db_id=[ID] option");
   }
+
+  db_query('UPDATE chado.blast_hit_data 
+            SET db_id = :new_db_id 
+            WHERE db_id = :old_db_id
+              AND feature_id IN (
+                SELECT feature_id FROM chado.feature WHERE organism_id=:oid
+              )
+            ', [
+    ':oid' => $organism_id,
+    ':old_db_id' => $old_db_id,
+    ':new_db_id' => $new_db_id,
+  ])->execute();
 }
