@@ -40,9 +40,9 @@ function drush_automated_annotation_get_dbs() {
   ])->fetchAll();
   var_dump($dbs);
 
-  $db_ids = array_map($dbs, function ($db) {
+  $db_ids = array_map(function ($db) {
     return $db->db_id;
-  });
+  }, $dbs);
 
   var_dump($db_ids);
 
