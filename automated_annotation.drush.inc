@@ -46,7 +46,7 @@ function drush_automated_annotation_get_dbs() {
 
   var_dump($db_ids);
 
-  $orgs = db_query('SELECT distinct o.organism_id, o.common_name, genus, species 
+  $orgs = db_query('select distinct o.organism_id, o.common_name, genus, species 
             from chado.blast_hit_data b 
             inner join chado.feature f on f.feature_id = b.feature_id
             inner join chado.organism o on f.organism_id = o.organism_id
