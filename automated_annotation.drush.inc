@@ -36,11 +36,17 @@ function drush_automated_annotation_get_dbs() {
   $dbs = db_query('SELECT distinct b.db_id, d.name FROM chado.blast_hit_data b inner join chado.db d on b.db_id = d.db_id')->fetchAll();
   var_dump($dbs);
 
+  $db_ids = array_filter($dbs, function($db) {
+    return !in_array($db->name, ['UNIPROT/TREMBL', 'Swiss-Prot']);
+  });
+
+
   $orgs = db_query('SELECT distinct o.organism_id, o.common_name, genus, species 
             from chado.blast_hit_data b 
             inner join chado.feature f on f.feature_id = b.feature_id
             inner join chado.organism o on f.organism_id = o.organism_id
-            ')->fetchAll();
+            where b.db_id in (:dbs)
+            ', [':dbs', $db_ids])->fetchAll();
 
   var_dump($orgs);
 }
