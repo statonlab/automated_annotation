@@ -41,7 +41,7 @@ function drush_automated_annotation_get_dbs() {
   var_dump($dbs);
 
   $db_ids = array_map($dbs, function ($db) {
-    return $db->id;
+    return $db->db_id;
   });
 
   var_dump($db_ids);
