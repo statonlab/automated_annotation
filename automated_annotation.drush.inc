@@ -15,8 +15,8 @@ function automated_annotation_drush_command() {
     'options' => [
       'organism_id' => 'o1',
       'old_db_id' => 'o2',
-      'new_db_id' => 'o3'
-    ]
+      'new_db_id' => 'o3',
+    ],
   ];
 
   $commands['get-dbs'] = [
@@ -85,6 +85,7 @@ function drush_automated_annotation_clear_blast_db() {
 
   $t = db_transaction();
   try {
+    drush_log('Starting DB conversion');
     db_query('UPDATE chado.blast_hit_data 
             SET db_id = :new_db_id 
             WHERE db_id = :old_db_id
@@ -96,8 +97,11 @@ function drush_automated_annotation_clear_blast_db() {
       ':old_db_id' => $old_db_id,
       ':new_db_id' => $new_db_id,
     ])->execute();
+
+    drush_log('Done', 'success');
   } catch (\Exception $exception) {
     $t->rollback();
     drush_log('ERROR: ' . $exception->getMessage(), 'error');
   }
+
 }
