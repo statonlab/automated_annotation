@@ -16,10 +16,11 @@ function automated_annotation_drush_command() {
 
   $commands['get-dbs'] = [
     'description' => 'tmp fn',
-  ];
-
-  $commands['get-organisms'] = [
-    'description' => 'tmp fn',
+    'options' => [
+      'organism_id' => '',
+      'old_db_id' => '',
+      'new_db_id' => ''
+    ]
   ];
 
   return $commands;
