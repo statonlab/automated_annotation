@@ -84,22 +84,22 @@ function drush_automated_annotation_clear_blast_db() {
 
   $t = db_transaction();
   try {
-    drush_log('Starting DB conversion');
+    print "Starting DB conversion for organism $organism_id, db $old_db_id to $new_db_id\n";
+
     db_query('UPDATE chado.blast_hit_data 
             SET db_id = :new_db_id 
             WHERE db_id = :old_db_id
               AND feature_id IN (
                 SELECT feature_id FROM chado.feature WHERE organism_id=:oid
-              )
-            ', [
+              )', [
       ':oid' => $organism_id,
       ':old_db_id' => $old_db_id,
       ':new_db_id' => $new_db_id,
     ])->execute();
 
-    drush_log('Done', 'success');
+    print "Success!\n";
   } catch (\Exception $exception) {
     $t->rollback();
-    drush_log('ERROR: ' . $exception->getMessage(), 'error');
+    print "ERROR: " . $exception->getMessage() . "\n";
   }
 }
