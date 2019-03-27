@@ -90,12 +90,12 @@ function drush_automated_annotation_clear_blast_db() {
             SET db_id = :new_db_id 
             WHERE db_id = :old_db_id
               AND feature_id IN (
-                SELECT feature_id FROM chado.feature WHERE organism_id=:oid
+                SELECT feature_id FROM chado.feature WHERE organism_id = :oid
               )', [
       ':oid' => $organism_id,
       ':old_db_id' => $old_db_id,
       ':new_db_id' => $new_db_id,
-    ])->execute();
+    ]);
 
     print "Success!\n";
   } catch (\Exception $exception) {
