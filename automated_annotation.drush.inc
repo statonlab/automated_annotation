@@ -95,7 +95,7 @@ function drush_automated_annotation_clear_blast_db() {
       ':oid' => $organism_id,
       ':old_db_id' => $old_db_id,
       ':new_db_id' => $new_db_id,
-    ]);
+    ])->fetchAll();
 
     print "Success!\n";
   } catch (\Exception $exception) {
