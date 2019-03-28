@@ -44,6 +44,11 @@ function drush_automated_annotation_get_dbs() {
     return $db->db_id;
   }, $dbs);
 
+  if(empty($db_ids)) {
+    print "All is good here!!\n";
+    return;
+  }
+
   $orgs = db_query('select distinct o.organism_id, o.common_name, genus, species 
             from chado.blast_hit_data b 
             inner join chado.feature f on f.feature_id = b.feature_id
