@@ -54,8 +54,10 @@ class FastaDumper extends Dumper {
    * @param object $feature A feature object.
    */
   protected function fastaLine($feature) {
-    $this->write(">{$feature->uniquename}");
-    $this->write(wordwrap($feature->residues, 75, "\n", true));
+    if (!empty($feature->residues)) {
+      $this->write(">{$feature->uniquename}");
+      $this->write(wordwrap($feature->residues, 75, "\n", TRUE));
+    }
     return $this;
   }
 
