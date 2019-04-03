@@ -42,7 +42,7 @@ function automated_annotation_report_form($form, &$form_state) {
   if (isset($form_state['values'])
     && isset($form_state['values']['organism'])
   ) {
-    $finder = new \AutomatedAnnotation\AnnotationFinder();
+    $finder = new AutomatedAnnotation\AnnotationFinder();
     $organism_id = $form_state['values']['organism'];
     $blast_time_start = time();
     $blast = $finder->blast($organism_id);
