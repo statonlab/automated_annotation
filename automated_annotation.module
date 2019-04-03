@@ -65,7 +65,7 @@ function automated_annotation_perform_checks() {
 
   $organisms = automated_annotation_get_organisms($settings['max_organisms']);
 
-  $finder = new \AutomatedAnnotation\AnnotationFinder();
+  $finder = new AutomatedAnnotation\AnnotationFinder();
 
   $types = ['mRNA', 'polypeptide', 'gene'];
   $SO_terms = $finder->cvterm($types);
@@ -97,7 +97,7 @@ function automated_annotation_perform_checks() {
   $files = [];
   foreach ($SO_terms as $term) {
     $file_path = "$path/{$term->name}.fasta";
-    $dumper = new \AutomatedAnnotation\FastaDumper($file_path);
+    $dumper = new AutomatedAnnotation\FastaDumper($file_path);
     $files[] = $dumper->organisms($organism_ids)
       ->type($term)
       ->dump();
@@ -124,7 +124,7 @@ function automated_annotation_has_annotation($terms) {
 /**
  * @param $report
  *
- * @throws \MailCLIException
+ * @throws Exception
  */
 function automated_annotation_send_mail($report, $files) {
   $header = "FASTA files can be found at:\n";
@@ -138,6 +138,7 @@ function automated_annotation_send_mail($report, $files) {
     $organism = $item['organism'];
 
     if (automated_annotation_count_features($organism) <= 0) {
+      $body .= "$organism->genus $organism->species ({$organism->common_name}) has no features!\n\n";
       continue;
     }
 
@@ -167,6 +168,7 @@ function automated_annotation_send_mail($report, $files) {
   $lines = "$header $body";
 
   $settings = automated_annotation_get_settings();
+
   (new MailCLIMessage())
     ->subject('Automated Annotation Report ' . date('m/d/Y'))
     ->to($settings['emails'])
